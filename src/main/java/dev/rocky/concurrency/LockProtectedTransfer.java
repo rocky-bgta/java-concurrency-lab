@@ -34,8 +34,9 @@ public final class LockProtectedTransfer {
             second.lock.lock();
             try {
                 if (from.balance < amount) throw new IllegalArgumentException("insufficient funds");
+                long updatedDestination = Math.addExact(to.balance, amount);
                 from.balance -= amount;
-                to.balance = Math.addExact(to.balance, amount);
+                to.balance = updatedDestination;
             } finally { second.lock.unlock(); }
         } finally { first.lock.unlock(); }
     }
