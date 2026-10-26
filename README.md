@@ -1,19 +1,38 @@
 # Java Concurrency Lab
 
-> Work in progress — project scaffold and examples are being developed. This README does not claim implementation or passing tests yet.
+Runnable Java 17 examples for senior Java concurrency interviews.
 
-## Purpose
+## Run
 
-Java Memory Model, volatile visibility vs atomicity, AtomicLong, LongAdder, ConcurrentHashMap.compute/merge, and deterministic concurrent tests.
+```bash
+mvn clean verify
+```
 
-## Planned quality bar
+## Implemented
 
-- Java 17+ and Maven; Spring Boot where relevant.
-- Focused, runnable code examples and JUnit 5 tests.
-- Integration tests for external dependencies where applicable.
-- GitHub Actions build and test workflow.
-- Architecture diagrams, setup instructions, design tradeoffs, and interview discussion prompts.
+- `SafeCounter` increments an `AtomicLong` and `LongAdder` under concurrent contention.
+- JUnit 5 uses a start latch and multiple workers, then checks results after completion.
+- GitHub Actions runs `mvn -B verify` on pushes and pull requests.
 
-## Status
+## Design
 
-Initial project scope documented. Code, tests, and CI are **not yet implemented**.
+```mermaid
+flowchart LR
+  W[Concurrent worker threads] --> C[SafeCounter.increment]
+  C --> A[AtomicLong.incrementAndGet]
+  C --> L[LongAdder.increment]
+  A --> R[Exact linearizable counter]
+  L --> S[High-throughput aggregate snapshot]
+```
+
+`volatile` ensures visibility, not atomic read-modify-write. `AtomicLong` offers atomic operations; `LongAdder.sum()` is not an atomic snapshot during concurrent updates. The test waits for every worker before comparing counts.
+
+## Next implementation milestones
+
+- Volatile visibility vs non-atomic increment examples.
+- `ConcurrentHashMap.compute` and `merge` examples.
+- Lock coordination, interruption, and executor saturation demonstrations.
+
+## Interview prompts
+
+Why does `volatile int count; count++` lose increments? When should you choose `AtomicLong` instead of `LongAdder`?
